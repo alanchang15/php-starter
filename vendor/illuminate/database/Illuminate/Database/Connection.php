@@ -60,7 +60,7 @@ class Connection implements ConnectionInterface {
 	/**
 	 * The cache manager instance.
 	 *
-	 * @var \Illuminate\Cache\CacheManager
+	 * @var \Illuminate\Cache\CacheManger
 	 */
 	protected $cache;
 
@@ -72,7 +72,7 @@ class Connection implements ConnectionInterface {
 	protected $fetchMode = PDO::FETCH_ASSOC;
 
 	/**
-	 * The number of active transactions.
+	 * The number of active transasctions.
 	 *
 	 * @var int
 	 */
@@ -370,7 +370,7 @@ class Connection implements ConnectionInterface {
 	 */
 	public function unprepared($query)
 	{
-		return $this->run($query, array(), function($me, $query)
+		return $this->run($query, array(), function($me, $query, $bindings)
 		{
 			if ($me->pretending()) return true;
 
@@ -454,8 +454,6 @@ class Connection implements ConnectionInterface {
 		{
 			$this->pdo->beginTransaction();
 		}
-
-		$this->fireConnectionEvent('beganTransaction');
 	}
 
 	/**
@@ -468,8 +466,6 @@ class Connection implements ConnectionInterface {
 		if ($this->transactions == 1) $this->pdo->commit();
 
 		--$this->transactions;
-
-		$this->fireConnectionEvent('committed');
 	}
 
 	/**
@@ -489,18 +485,6 @@ class Connection implements ConnectionInterface {
 		{
 			--$this->transactions;
 		}
-
-		$this->fireConnectionEvent('rollingBack');
-	}
-
-	/**
-	 * Get the number of active transactions.
-	 *
-	 * @return int
-	 */
-	public function transactionLevel()
-	{
-		return $this->transactions;
 	}
 
 	/**
@@ -552,7 +536,7 @@ class Connection implements ConnectionInterface {
 		// lot more helpful to the developer instead of just the database's errors.
 		catch (\Exception $e)
 		{
-			throw new QueryException($query, $this->prepareBindings($bindings), $e);
+			throw new QueryException($query, $bindings, $e);
 		}
 
 		// Once we have run the query we will calculate the time that it took to run and
@@ -596,20 +580,6 @@ class Connection implements ConnectionInterface {
 		if (isset($this->events))
 		{
 			$this->events->listen('illuminate.query', $callback);
-		}
-	}
-
-	/**
-	 * Fire an event for this connection.
-	 *
-	 * @param  string  $event
-	 * @return void
-	 */
-	protected function fireConnectionEvent($event)
-	{
-		if (isset($this->events))
-		{
-			$this->events->fire('connection.'.$this->getName().'.'.$event, $this);
 		}
 	}
 
@@ -679,8 +649,6 @@ class Connection implements ConnectionInterface {
 	 */
 	public function getReadPdo()
 	{
-		if ($this->transactions >= 1) return $this->getPdo();
-
 		return $this->readPdo ?: $this->pdo;
 	}
 
@@ -946,16 +914,6 @@ class Connection implements ConnectionInterface {
 	public function disableQueryLog()
 	{
 		$this->loggingQueries = false;
-	}
-
-	/**
-	 * Determine whether we're logging queries.
-	 *
-	 * @return bool
-	 */
-	public function logging()
-	{
-		return $this->loggingQueries;
 	}
 
 	/**

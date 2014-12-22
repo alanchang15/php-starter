@@ -126,7 +126,7 @@ class Collection extends BaseCollection {
 	 */
 	public function merge($collection)
 	{
-		$dictionary = $this->getDictionary();
+		$dictionary = $this->getDictionary($this);
 
 		foreach ($collection as $item)
 		{
@@ -189,47 +189,19 @@ class Collection extends BaseCollection {
 	 */
 	public function unique()
 	{
-		$dictionary = $this->getDictionary();
+		$dictionary = $this->getDictionary($this);
 
 		return new static(array_values($dictionary));
 	}
 
-	/**
-	 * Returns only the models from the collection with the specified keys.
-	 *
-	 * @param  mixed  $keys
-	 * @return \Illuminate\Support\Collection
-	 */
-	public function only($keys)
-	{
-		$dictionary = array_only($this->getDictionary($this), $keys);
-
-		return new static(array_values($dictionary));
-	}
-
-	/**
-	 * Returns all models in the collection except the models with specified keys.
-	 *
-	 * @param  mixed  $keys
-	 * @return \Illuminate\Support\Collection
-	 */
-	public function except($keys)
-	{
-	    $dictionary = array_except($this->getDictionary($this), $keys);
-
-	    return new static(array_values($dictionary));
-	}
-
-	/**
+	/*
 	 * Get a dictionary keyed by primary keys.
 	 *
 	 * @param  \Illuminate\Support\Collection  $collection
 	 * @return array
 	 */
-	public function getDictionary($collection = null)
+	protected function getDictionary($collection)
 	{
-		$collection = $collection ?: $this;
-
 		$dictionary = array();
 
 		foreach ($collection as $value)
@@ -238,16 +210,6 @@ class Collection extends BaseCollection {
 		}
 
 		return $dictionary;
-	}
-
-	/**
-	 * Get a base Support collection instance from this collection.
-	 *
-	 * @return \Illuminate\Support\Collection
-	 */
-	public function toBase()
-	{
-		return new BaseCollection($this->items);
 	}
 
 }

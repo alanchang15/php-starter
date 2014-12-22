@@ -57,7 +57,7 @@ abstract class HasOneOrMany extends Relation {
 	 */
 	public function addEagerConstraints(array $models)
 	{
-		$this->query->whereIn($this->foreignKey, $this->getKeys($models, $this->localKey));
+		$this->query->whereIn($this->foreignKey, $this->getKeys($models));
 	}
 
 	/**
@@ -240,7 +240,7 @@ abstract class HasOneOrMany extends Relation {
 	}
 
 	/**
-	 * Get the key for comparing against the parent key in "has" query.
+	 * Get the key for comparing against the pareny key in "has" query.
 	 *
 	 * @return string
 	 */
@@ -276,17 +276,17 @@ abstract class HasOneOrMany extends Relation {
 	 *
 	 * @return mixed
 	 */
-	public function getParentKey()
+	protected function getParentKey()
 	{
 		return $this->parent->getAttribute($this->localKey);
 	}
 
 	/**
-	 * Get the fully qualified parent key name.
+	 * Get the fully qualified parent key naem.
 	 *
 	 * @return string
 	 */
-	public function getQualifiedParentKeyName()
+	protected function getQualifiedParentKeyName()
 	{
 		return $this->parent->getTable().'.'.$this->localKey;
 	}

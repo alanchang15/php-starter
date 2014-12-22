@@ -36,10 +36,7 @@ class Seeder {
 	{
 		$this->resolve($class)->run();
 
-		if (isset($this->command))
-		{
-			$this->command->getOutput()->writeln("<info>Seeded:</info> $class");
-		}
+		$this->command->getOutput()->writeln("<info>Seeded:</info> $class");
 	}
 
 	/**
@@ -54,26 +51,19 @@ class Seeder {
 		{
 			$instance = $this->container->make($class);
 
-			$instance->setContainer($this->container);
+			return $instance->setContainer($this->container)->setCommand($this->command);
 		}
 		else
 		{
-			$instance = new $class;
+			return new $class;
 		}
-
-		if (isset($this->command))
-		{
-			$instance->setCommand($this->command);
-		}
-
-		return $instance;
 	}
 
 	/**
 	 * Set the IoC container instance.
 	 *
 	 * @param  \Illuminate\Container\Container  $container
-	 * @return \Illuminate\Database\Seeder
+	 * @return void
 	 */
 	public function setContainer(Container $container)
 	{
@@ -86,7 +76,7 @@ class Seeder {
 	 * Set the console command instance.
 	 *
 	 * @param  \Illuminate\Console\Command  $command
-	 * @return \Illuminate\Database\Seeder
+	 * @return void
 	 */
 	public function setCommand(Command $command)
 	{
